@@ -12,7 +12,7 @@ class HandwritingRecorder:
         canvas_height = 500
         master.resizable(False, False)
 
-        self.bg_image_path = "images/tianzige.png"
+        self.bg_image_path = "tianzige.png"
         self.original_image = Image.open(self.bg_image_path)
         self.bg_image = ImageTk.PhotoImage(
             self.original_image.resize((canvas_width, canvas_height), Image.LANCZOS)
