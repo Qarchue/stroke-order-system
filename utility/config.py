@@ -2,6 +2,8 @@ from pydantic_settings import BaseSettings
 
 class Config(BaseSettings):
 
+    canva_size: set = (500, 500)
+
     CANVAS_WIDTH: int = 500
     
     CANVAS_HEIGHT: int = 500

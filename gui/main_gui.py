@@ -1,4 +1,4 @@
-import tkinter as tk
+import tkinter
 from PIL import Image, ImageTk
 
 from utility import config
@@ -7,7 +7,7 @@ from utility import DataProcessor
 from .handwriting_recorder import HandwritingRecorder
 from .record_player import RecordPlayer
 
-class MainGUI(tk.Tk):
+class MainGUI(tkinter.Tk):
     def __init__(self):
         super().__init__()
         self._setup_window()
@@ -31,7 +31,7 @@ class MainGUI(tk.Tk):
 
     def _create_canvas(self):
         """創建並配置繪圖畫布"""
-        self.canvas = tk.Canvas(
+        self.canvas = tkinter.Canvas(
             self, 
             width=config.CANVAS_WIDTH, 
             height=config.CANVAS_HEIGHT, 
@@ -42,15 +42,16 @@ class MainGUI(tk.Tk):
         self.canvas.create_image(
             0, 0, 
             image=self.bg_image, 
-            anchor=tk.NW, 
+            anchor=tkinter.NW, 
             tags="background_image"
         )
 
     def _initialize_functional_modules(self):
-        """實例化錄製器、播放器和資料處理器"""
-        self.recorder = HandwritingRecorder(self.canvas)
-        self.player = RecordPlayer(self.canvas)
+        """實例化錄製器、播放器和資料處理器，並將 MainGUI 作為它們的 master"""
+        self.recorder = HandwritingRecorder(self, self.canvas)
+        self.player = RecordPlayer(self, self.canvas)
         self.data_processor = DataProcessor()
+
 
     def _bind_events(self):
         """綁定滑鼠事件到錄製器的方法"""
@@ -60,20 +61,20 @@ class MainGUI(tk.Tk):
 
     def _create_buttons(self):
         """創建並佈局按鈕"""
-        button_frame = tk.Frame(self)
+        button_frame = tkinter.Frame(self)
         button_frame.pack(pady=10)
 
-        self.clear_button = tk.Button(button_frame, text="清除筆畫", command=self.clear_all)
-        self.clear_button.pack(side=tk.LEFT, padx=5)
+        self.clear_button = tkinter.Button(button_frame, text="清除筆畫", command=self.clear_all)
+        self.clear_button.pack(side=tkinter.LEFT, padx=5)
 
-        self.save_button = tk.Button(button_frame, text="儲存資料", command=self.save_current_data)
-        self.save_button.pack(side=tk.LEFT, padx=5)
+        self.save_button = tkinter.Button(button_frame, text="儲存資料", command=self.save_current_data)
+        self.save_button.pack(side=tkinter.LEFT, padx=5)
 
-        self.load_button = tk.Button(button_frame, text="載入資料", command=self.load_and_redraw_data)
-        self.load_button.pack(side=tk.LEFT, padx=5)
+        self.load_button = tkinter.Button(button_frame, text="載入資料", command=self.load_and_redraw_data)
+        self.load_button.pack(side=tkinter.LEFT, padx=5)
 
-        self.play_button = tk.Button(button_frame, text="播放筆順", command=self.play_recorded_strokes)
-        self.play_button.pack(side=tk.LEFT, padx=5)
+        self.play_button = tkinter.Button(button_frame, text="播放筆順", command=self.play_recorded_strokes)
+        self.play_button.pack(side=tkinter.LEFT, padx=5)
 
     def clear_all(self):
         """清除畫布上的所有筆畫並重置錄製器資料"""
