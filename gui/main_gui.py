@@ -2,10 +2,10 @@ import tkinter
 from PIL import Image, ImageTk
 
 from utility import config
-from utility import DataProcessor
+from utility import DataProcess
 
-from .handwriting_recorder import HandwritingRecorder
-from .record_player import RecordPlayer
+from .modules.buttons import ClearBtn, ReplayBtn
+from .modules.custom_canva import CustomCanva
 
 class MainGUI(tkinter.Tk):
     def __init__(self):
@@ -13,94 +13,44 @@ class MainGUI(tkinter.Tk):
         self._setup_window()
         self._load_background_image()
         self._create_canvas()
-        self._initialize_functional_modules()
         self._create_buttons()
-        self._bind_events() # 新增：綁定事件
-
+        
     def _setup_window(self):
-        """設定主視窗的基本屬性"""
         self.title("筆順學習系統")
         self.resizable(False, False)
 
     def _load_background_image(self):
-        """載入並準備背景圖片"""
-        self.original_image = Image.open(config.BG_IMAGE_PATH)
+        self.original_image = Image.open('gui/tianzige.png')
         self.bg_image = ImageTk.PhotoImage(
-            self.original_image.resize((config.CANVAS_WIDTH, config.CANVAS_HEIGHT), Image.LANCZOS)
-        )
-
-    def _create_canvas(self):
-        """創建並配置繪圖畫布"""
-        self.canvas = tkinter.Canvas(
-            self, 
-            width=config.CANVAS_WIDTH, 
-            height=config.CANVAS_HEIGHT, 
-            bg="white"
+            self.original_image.resize(
+                (config.CANVAS_WIDTH, config.CANVAS_HEIGHT), 
+                Image.LANCZOS,
+            )
         )
         
-        self.canvas.pack()
-        self.canvas.create_image(
+        
+    def _create_canvas(self):
+        self.canva = CustomCanva(self)
+
+        self.canva.pack()
+        self.canva.create_image(
             0, 0, 
             image=self.bg_image, 
             anchor=tkinter.NW, 
             tags="background_image"
         )
 
-    def _initialize_functional_modules(self):
-        """實例化錄製器、播放器和資料處理器，並將 MainGUI 作為它們的 master"""
-        self.recorder = HandwritingRecorder(self, self.canvas)
-        self.player = RecordPlayer(self, self.canvas)
-        self.data_processor = DataProcessor()
-
-
-    def _bind_events(self):
-        """綁定滑鼠事件到錄製器的方法"""
-        self.canvas.bind("<Button-1>", self.recorder.start_stroke)
-        self.canvas.bind("<B1-Motion>", self.recorder.draw_stroke)
-        self.canvas.bind("<ButtonRelease-1>", self.recorder.end_stroke)
 
     def _create_buttons(self):
-        """創建並佈局按鈕"""
-        button_frame = tkinter.Frame(self)
-        button_frame.pack(pady=10)
+            """新增：建立按鈕區域"""
+            # 1. 建立一個容器 Frame，放在畫布下方
+            btn_frame = tkinter.Frame(self)
+            btn_frame.pack(side="bottom", pady=20)
 
-        self.clear_button = tkinter.Button(button_frame, text="清除筆畫", command=self.clear_all)
-        self.clear_button.pack(side=tkinter.LEFT, padx=5)
+            # 2. 實例化清除按鈕 (傳入 btn_frame 作為父容器，self.canva 作為控制對象)
+            self.btn_clear = ClearBtn(btn_frame, self.canva)
+            self.btn_clear.pack(side="left", padx=20)
 
-        self.save_button = tkinter.Button(button_frame, text="儲存資料", command=self.save_current_data)
-        self.save_button.pack(side=tkinter.LEFT, padx=5)
-
-        self.load_button = tkinter.Button(button_frame, text="載入資料", command=self.load_and_redraw_data)
-        self.load_button.pack(side=tkinter.LEFT, padx=5)
-
-        self.play_button = tkinter.Button(button_frame, text="播放筆順", command=self.play_recorded_strokes)
-        self.play_button.pack(side=tkinter.LEFT, padx=5)
-
-    def clear_all(self):
-        """清除畫布上的所有筆畫並重置錄製器資料"""
-        self.canvas.delete("drawing_stroke")
-        self.recorder.clear_recorder_data()
-        print("畫布已清除，錄製器資料已重置。")
-
-    def save_current_data(self):
-        """儲存錄製器中當前的筆畫資料"""
-        recorded_data = self.recorder.get_recorded_data()
-        self.data_processor.save_data(recorded_data)
-
-    def load_and_redraw_data(self):
-        """從檔案載入資料並重新繪製到畫布上"""
-        loaded_data = self.data_processor.load_data()
-        if loaded_data:
-            self.recorder.all_canvas_lines = self.player.redraw_loaded_data(loaded_data)
-            # 重置 recorder 的數據和筆畫編號，以便在載入後可以從正確的狀態繼續錄製
-            self.recorder.strokes_data = loaded_data
-            # 找到載入數據中最大的筆畫編號，並在此基礎上加1作為下一個筆畫的編號
-            self.recorder.stroke_number = max([s[0] for s in loaded_data]) if loaded_data else 0
-            print("載入資料後，如果需要繼續錄製，將從載入資料的末尾繼續。")
-        else:
-            print("沒有載入任何資料。")
-
-    def play_recorded_strokes(self):
-        """播放錄製器中已記錄的筆畫"""
-        all_lines = self.recorder.get_all_canvas_lines()
-        self.player.play_strokes(all_lines)
+            # 3. 實例化回放按鈕
+            self.btn_replay = ReplayBtn(btn_frame, self.canva)
+            self.btn_replay.pack(side="left", padx=20)

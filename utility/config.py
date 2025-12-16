@@ -8,8 +8,6 @@ class Config(BaseSettings):
     
     CANVAS_HEIGHT: int = 500
     
-    BG_IMAGE_PATH: str = "images/tianzige.png"
-    
     OUTPUT_CSV_PATH: str = "handwriting_data.csv"
     
     PLAYBACK_SPEED: float = 0.05
